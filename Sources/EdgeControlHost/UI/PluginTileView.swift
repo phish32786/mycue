@@ -97,6 +97,8 @@ struct PluginTileView: View {
             SpotifySurfaceView(surface: plugin.surface, pluginID: plugin.id)
         case .weather:
             WeatherSurfaceView(surface: plugin.surface)
+        case .f1:
+            F1SurfaceView(surface: plugin.surface)
         case .launcher:
             LauncherSurfaceView(surface: plugin.surface, pluginID: plugin.id)
         case .webWidget:

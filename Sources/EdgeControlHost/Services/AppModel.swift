@@ -369,6 +369,11 @@ public final class AppModel: ObservableObject {
         saveSettings()
     }
 
+    public func updateF1Settings(_ update: (inout F1PluginSettings) -> Void) {
+        update(&settings.f1)
+        saveSettings()
+    }
+
     public func updateWebWidgetSettings(_ update: (inout WebWidgetSettings) -> Void) {
         update(&settings.webWidget)
         saveSettings()

@@ -13,6 +13,7 @@ public struct AppSettings: Codable, Hashable, Sendable {
     public var enabledPluginIDs: Set<String>
     public var disabledPluginIDs: Set<String>
     public var weather: WeatherPluginSettings
+    public var f1: F1PluginSettings
     public var webWidget: WebWidgetSettings
     public var mediaGallery: MediaGallerySettings
     public var dashboardPages: [DashboardPageConfiguration]
@@ -30,6 +31,7 @@ public struct AppSettings: Codable, Hashable, Sendable {
         enabledPluginIDs: Set<String> = [],
         disabledPluginIDs: Set<String> = [],
         weather: WeatherPluginSettings = WeatherPluginSettings(),
+        f1: F1PluginSettings = F1PluginSettings(),
         webWidget: WebWidgetSettings = WebWidgetSettings(),
         mediaGallery: MediaGallerySettings = MediaGallerySettings(),
         dashboardPages: [DashboardPageConfiguration] = [],
@@ -46,6 +48,7 @@ public struct AppSettings: Codable, Hashable, Sendable {
         self.enabledPluginIDs = enabledPluginIDs
         self.disabledPluginIDs = disabledPluginIDs
         self.weather = weather
+        self.f1 = f1
         self.webWidget = webWidget
         self.mediaGallery = mediaGallery
         self.dashboardPages = dashboardPages
@@ -66,6 +69,7 @@ extension AppSettings {
         case enabledPluginIDs
         case disabledPluginIDs
         case weather
+        case f1
         case webWidget
         case mediaGallery
         case dashboardPages
@@ -85,6 +89,7 @@ extension AppSettings {
         enabledPluginIDs = try container.decodeIfPresent(Set<String>.self, forKey: .enabledPluginIDs) ?? []
         disabledPluginIDs = try container.decodeIfPresent(Set<String>.self, forKey: .disabledPluginIDs) ?? []
         weather = try container.decodeIfPresent(WeatherPluginSettings.self, forKey: .weather) ?? WeatherPluginSettings()
+        f1 = try container.decodeIfPresent(F1PluginSettings.self, forKey: .f1) ?? F1PluginSettings()
         webWidget = try container.decodeIfPresent(WebWidgetSettings.self, forKey: .webWidget) ?? WebWidgetSettings()
         mediaGallery = try container.decodeIfPresent(MediaGallerySettings.self, forKey: .mediaGallery) ?? MediaGallerySettings()
         dashboardPages = try container.decodeIfPresent([DashboardPageConfiguration].self, forKey: .dashboardPages) ?? []

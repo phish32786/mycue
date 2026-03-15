@@ -6,11 +6,12 @@ ICONSET_DIR="${ROOT_DIR}/.build/MyCue.iconset"
 OUTPUT_PATH="${ROOT_DIR}/Resources/AppIcon.icns"
 MASTER_PNG="${ROOT_DIR}/.build/MyCue-app-icon-master.png"
 COMPOSER_DIR="${ROOT_DIR}/docs/assets/MyCue.icon/Assets"
+FLATTENED_PREVIEW="${ROOT_DIR}/docs/assets/icon-composer/flattened-preview.png"
 
 rm -rf "${ICONSET_DIR}"
 mkdir -p "${ICONSET_DIR}" "$(dirname "${OUTPUT_PATH}")" "$(dirname "${MASTER_PNG}")"
 
-if [[ -d "${COMPOSER_DIR}" ]]; then
+if [[ -d "${COMPOSER_DIR}" && -x "$(command -v magick)" ]]; then
   magick -size 1024x1024 xc:"#060708" \
     "${COMPOSER_DIR}/layer-01-shell.png" \
     "${COMPOSER_DIR}/layer-02-grid.png" \
@@ -18,7 +19,7 @@ if [[ -d "${COMPOSER_DIR}" ]]; then
     "${COMPOSER_DIR}/layer-04-accent.png" \
     -background none -layers merge +repage \
     "${MASTER_PNG}"
-else
+elif [[ -x "$(command -v magick)" ]]; then
   magick -size 1024x1024 xc:"#060708" \
     -fill "#171B1F" -stroke "#545B63" -strokewidth 16 \
     -draw "roundrectangle 88,88 936,936 210,210" \
@@ -45,13 +46,18 @@ else
     -fill "#101214" \
     -draw "circle 768,768 786,768" \
     "${MASTER_PNG}"
+elif [[ -f "${FLATTENED_PREVIEW}" ]]; then
+  cp "${FLATTENED_PREVIEW}" "${MASTER_PNG}"
+else
+  echo "Neither ImageMagick nor flattened icon preview is available." >&2
+  exit 1
 fi
 
 sizes=(16 32 128 256 512)
 for size in "${sizes[@]}"; do
-  magick "${MASTER_PNG}" -resize "${size}x${size}" "${ICONSET_DIR}/icon_${size}x${size}.png"
+  sips -z "${size}" "${size}" "${MASTER_PNG}" --out "${ICONSET_DIR}/icon_${size}x${size}.png" >/dev/null
   double_size=$((size * 2))
-  magick "${MASTER_PNG}" -resize "${double_size}x${double_size}" "${ICONSET_DIR}/icon_${size}x${size}@2x.png"
+  sips -z "${double_size}" "${double_size}" "${MASTER_PNG}" --out "${ICONSET_DIR}/icon_${size}x${size}@2x.png" >/dev/null
 done
 
 iconutil -c icns "${ICONSET_DIR}" -o "${OUTPUT_PATH}"

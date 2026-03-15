@@ -36,6 +36,7 @@ public enum PluginKind: String, Codable, Hashable, Sendable, CaseIterable {
     case systemStats
     case spotify
     case weather
+    case f1
     case launcher
     case webWidget
     case mediaGallery
@@ -170,6 +171,103 @@ public struct WeatherPoint: Codable, Hashable, Identifiable, Sendable {
     }
 }
 
+public enum F1PluginDataMode: String, Codable, Hashable, Sendable, CaseIterable {
+    case live
+}
+
+public enum F1PanelMode: String, Codable, Hashable, Sendable, CaseIterable {
+    case overview
+    case control
+    case tyres
+}
+
+public struct F1StandingRow: Codable, Hashable, Identifiable, Sendable {
+    public let id: String
+    public let position: Int
+    public let driverNumber: Int
+    public let acronym: String
+    public let teamName: String
+    public let teamColorHex: String?
+    public let gapText: String
+    public let statusText: String
+
+    public init(
+        id: String,
+        position: Int,
+        driverNumber: Int,
+        acronym: String,
+        teamName: String,
+        teamColorHex: String? = nil,
+        gapText: String,
+        statusText: String
+    ) {
+        self.id = id
+        self.position = position
+        self.driverNumber = driverNumber
+        self.acronym = acronym
+        self.teamName = teamName
+        self.teamColorHex = teamColorHex
+        self.gapText = gapText
+        self.statusText = statusText
+    }
+}
+
+public struct F1RaceControlItem: Codable, Hashable, Identifiable, Sendable {
+    public let id: String
+    public let timeText: String
+    public let category: String
+    public let flagText: String?
+    public let message: String
+    public let lapText: String?
+
+    public init(
+        id: String,
+        timeText: String,
+        category: String,
+        flagText: String? = nil,
+        message: String,
+        lapText: String? = nil
+    ) {
+        self.id = id
+        self.timeText = timeText
+        self.category = category
+        self.flagText = flagText
+        self.message = message
+        self.lapText = lapText
+    }
+}
+
+public struct F1Surface: Codable, Hashable, Sendable {
+    public let panelMode: F1PanelMode
+    public let sessionLabel: String
+    public let sessionStatus: String
+    public let circuitLabel: String
+    public let sourceLabel: String
+    public let topStandings: [F1StandingRow]
+    public let raceControl: [F1RaceControlItem]
+    public let tyreRows: [F1StandingRow]
+
+    public init(
+        panelMode: F1PanelMode,
+        sessionLabel: String,
+        sessionStatus: String,
+        circuitLabel: String,
+        sourceLabel: String,
+        topStandings: [F1StandingRow] = [],
+        raceControl: [F1RaceControlItem] = [],
+        tyreRows: [F1StandingRow] = []
+    ) {
+        self.panelMode = panelMode
+        self.sessionLabel = sessionLabel
+        self.sessionStatus = sessionStatus
+        self.circuitLabel = circuitLabel
+        self.sourceLabel = sourceLabel
+        self.topStandings = topStandings
+        self.raceControl = raceControl
+        self.tyreRows = tyreRows
+    }
+}
+
 public struct DashboardSurface: Codable, Hashable, Sendable {
     public let kind: PluginKind
     public let title: String
@@ -181,6 +279,7 @@ public struct DashboardSurface: Codable, Hashable, Sendable {
     public let media: MediaSurface?
     public let hourlyForecast: [WeatherPoint]
     public let dailyForecast: [WeatherPoint]
+    public let f1: F1Surface?
 
     public init(
         kind: PluginKind,
@@ -192,7 +291,8 @@ public struct DashboardSurface: Codable, Hashable, Sendable {
         actions: [SurfaceAction] = [],
         media: MediaSurface? = nil,
         hourlyForecast: [WeatherPoint] = [],
-        dailyForecast: [WeatherPoint] = []
+        dailyForecast: [WeatherPoint] = [],
+        f1: F1Surface? = nil
     ) {
         self.kind = kind
         self.title = title
@@ -204,6 +304,7 @@ public struct DashboardSurface: Codable, Hashable, Sendable {
         self.media = media
         self.hourlyForecast = hourlyForecast
         self.dailyForecast = dailyForecast
+        self.f1 = f1
     }
 }
 
@@ -284,6 +385,31 @@ public struct WebWidgetSettings: Codable, Hashable, Sendable {
     }
 }
 
+public struct F1PluginSettings: Codable, Hashable, Sendable {
+    public var title: String
+    public var subtitle: String
+    public var seasonYear: Int
+    public var sessionName: String
+    public var eventFilter: String
+    public var sessionKeyOverride: Int?
+
+    public init(
+        title: String = "Race Control",
+        subtitle: String = "OpenF1 timing and incidents",
+        seasonYear: Int = Calendar(identifier: .gregorian).component(.year, from: Date()),
+        sessionName: String = "Race",
+        eventFilter: String = "",
+        sessionKeyOverride: Int? = nil
+    ) {
+        self.title = title
+        self.subtitle = subtitle
+        self.seasonYear = seasonYear
+        self.sessionName = sessionName
+        self.eventFilter = eventFilter
+        self.sessionKeyOverride = sessionKeyOverride
+    }
+}
+
 public struct MediaGallerySettings: Codable, Hashable, Sendable {
     public var title: String
     public var subtitle: String
@@ -308,15 +434,18 @@ public struct MediaGallerySettings: Codable, Hashable, Sendable {
 
 public struct HostPluginSettings: Codable, Hashable, Sendable {
     public var weather: WeatherPluginSettings
+    public var f1: F1PluginSettings
     public var webWidget: WebWidgetSettings
     public var mediaGallery: MediaGallerySettings
 
     public init(
         weather: WeatherPluginSettings = WeatherPluginSettings(),
+        f1: F1PluginSettings = F1PluginSettings(),
         webWidget: WebWidgetSettings = WebWidgetSettings(),
         mediaGallery: MediaGallerySettings = MediaGallerySettings()
     ) {
         self.weather = weather
+        self.f1 = f1
         self.webWidget = webWidget
         self.mediaGallery = mediaGallery
     }

@@ -15,6 +15,14 @@ const state = {
       longitude: -83.0458,
       unitPreference: "automatic"
     },
+    f1: {
+      title: "Race Control",
+      subtitle: "OpenF1 timing and incidents",
+      seasonYear: new Date().getFullYear(),
+      sessionName: "Race",
+      eventFilter: "",
+      sessionKeyOverride: null
+    },
     webWidget: {
       title: "Web Widget",
       subtitle: "Embedded dashboard",

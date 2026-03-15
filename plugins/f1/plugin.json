@@ -1,0 +1,10 @@
+{
+  "id": "f1",
+  "name": "F1 Race Control",
+  "version": "0.1.0",
+  "apiVersion": "1.0.0",
+  "kind": "f1",
+  "entry": "index.mjs",
+  "permissions": ["network", "fileAccess"],
+  "defaultEnabled": true
+}

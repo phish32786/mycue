@@ -282,8 +282,9 @@ public final class PluginHostController {
     }
 
     private func runtimeSettings(from settings: AppSettings) -> HostPluginSettings {
-        HostPluginSettings(
+        return HostPluginSettings(
             weather: settings.weather,
+            f1: settings.f1,
             webWidget: settings.webWidget,
             mediaGallery: settings.mediaGallery
         )

@@ -22,6 +22,7 @@ public struct SettingsView: View {
                     hardwareCard
                     diagnosticsCard
                     pagesCard
+                    f1Card
                     weatherCard
                     webWidgetCard
                     mediaGalleryCard
@@ -323,6 +324,125 @@ public struct SettingsView: View {
         }
     }
 
+    private var f1Card: some View {
+        settingsCard("F1 Plugin", subtitle: "Use completed OpenF1 race data for race control, order, and tyre state.") {
+            VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Title")
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.58))
+                    TextField("Race Control", text: Binding(
+                        get: { model.settings.f1.title },
+                        set: { value in
+                            model.updateF1Settings { $0.title = value }
+                        }
+                    ))
+                    .textFieldStyle(.roundedBorder)
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Subtitle")
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.58))
+                    TextField("OpenF1 timing and incidents", text: Binding(
+                        get: { model.settings.f1.subtitle },
+                        set: { value in
+                            model.updateF1Settings { $0.subtitle = value }
+                        }
+                    ))
+                    .textFieldStyle(.roundedBorder)
+                }
+
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Season year")
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.58))
+                        TextField("2026", value: Binding(
+                            get: { model.settings.f1.seasonYear },
+                            set: { value in
+                                model.updateF1Settings { $0.seasonYear = value }
+                            }
+                        ), format: .number)
+                        .textFieldStyle(.roundedBorder)
+                    }
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Session")
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.58))
+                        TextField("Race", text: Binding(
+                            get: { model.settings.f1.sessionName },
+                            set: { value in
+                                model.updateF1Settings { $0.sessionName = value }
+                            }
+                        ))
+                        .textFieldStyle(.roundedBorder)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Event filter")
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.58))
+                    TextField("Latest completed race or Monaco / Melbourne / Japan", text: Binding(
+                        get: { model.settings.f1.eventFilter },
+                        set: { value in
+                            model.updateF1Settings { $0.eventFilter = value }
+                        }
+                    ))
+                    .textFieldStyle(.roundedBorder)
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Race presets")
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.58))
+
+                    HStack {
+                        f1PresetButton("Latest", filter: "")
+                        f1PresetButton("Australia", filter: "Australia")
+                        f1PresetButton("Japan", filter: "Japan")
+                    }
+
+                    HStack {
+                        f1PresetButton("Monaco", filter: "Monaco")
+                        f1PresetButton("Silverstone", filter: "Silverstone")
+                        f1PresetButton("Monza", filter: "Monza")
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Session key override")
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.58))
+                    TextField("11234", value: Binding(
+                        get: { model.settings.f1.sessionKeyOverride },
+                        set: { value in
+                            model.updateF1Settings { $0.sessionKeyOverride = value }
+                        }
+                    ), format: .number)
+                    .textFieldStyle(.roundedBorder)
+                }
+
+                HStack {
+                    Button("Use latest completed race") {
+                        model.updateF1Settings {
+                            $0.sessionName = "Race"
+                            $0.eventFilter = ""
+                            $0.sessionKeyOverride = nil
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                }
+
+                Text("The F1 plugin uses completed OpenF1 race sessions for stability. Leave the event filter empty for the latest completed race, set it to Monaco or Japan for a different Grand Prix, or use a session key override to pin an exact event.")
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.58))
+            }
+        }
+    }
+
     private var webWidgetCard: some View {
         settingsCard("Web Widget", subtitle: "Configure the native web surface for dashboards, docs, timers, and internal tools.") {
             VStack(alignment: .leading, spacing: 12) {
@@ -390,6 +510,17 @@ public struct SettingsView: View {
                     .foregroundStyle(.white.opacity(0.58))
             }
         }
+    }
+
+    private func f1PresetButton(_ title: String, filter: String) -> some View {
+        Button(title) {
+            model.updateF1Settings {
+                $0.sessionName = "Race"
+                $0.eventFilter = filter
+                $0.sessionKeyOverride = nil
+            }
+        }
+        .buttonStyle(.bordered)
     }
 
     private var mediaGalleryCard: some View {
