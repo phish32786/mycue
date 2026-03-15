@@ -24,7 +24,6 @@ jobs:
       MYCUE_APP_VERSION: ${{ github.event.inputs.app_version || '0.1.0-alpha' }}
       MYCUE_BUILD_NUMBER: ${{ github.event.inputs.build_number || github.run_number }}
       MYCUE_CODESIGN_IDENTITY: ${{ secrets.APPLE_DEVELOPER_IDENTITY }}
-      MYCUE_CODESIGN_KEYCHAIN: ${{ runner.temp }}/build.keychain-db
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       APPLE_KEY_ID: ${{ secrets.APPLE_NOTARY_KEY_ID }}
       APPLE_ISSUER_ID: ${{ secrets.APPLE_NOTARY_ISSUER_ID }}
@@ -56,6 +55,8 @@ jobs:
           KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
           CERT_PASSWORD: ${{ secrets.APPLE_DEVELOPER_ID_P12_PASSWORD }}
         run: |
+          export MYCUE_CODESIGN_KEYCHAIN="$RUNNER_TEMP/build.keychain-db"
+          echo "MYCUE_CODESIGN_KEYCHAIN=$MYCUE_CODESIGN_KEYCHAIN" >> "$GITHUB_ENV"
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$MYCUE_CODESIGN_KEYCHAIN"
           security list-keychains -d user -s "$MYCUE_CODESIGN_KEYCHAIN" login.keychain-db
           security default-keychain -s "$MYCUE_CODESIGN_KEYCHAIN"
