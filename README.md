@@ -18,11 +18,12 @@ This repository currently contains the first production-oriented scaffold:
 swift build
 swift test
 swift run edge-control
-./scripts/build-alpha.sh
+MYCUE_CODESIGN_IDENTITY="MyCue Local Dev" ./scripts/build-alpha.sh
 node runtime/node-host/src/host.mjs
 node devkit/src/preview.mjs --plugin system-stats
 node devkit/src/validate.mjs
 node --test devkit/test
+bash scripts/verify-touch-seize.sh dist/MyCue.app open
 ```
 
 ## Current assumptions
@@ -30,6 +31,8 @@ node --test devkit/test
 - The virtual device profile defaults to `2560x720`, matching the current CORSAIR XENEON EDGE product page.
 - When the XENEON screen is not detected, the app automatically falls back to windowed DevKit mode with normal macOS window controls and standard quit behavior.
 - On detected hardware, the host attempts to seize the touch HID path and uses persisted corner calibration data. If calibration is missing or invalid, the dashboard enters a dwell-based corner calibration flow.
+- For reliable hardware-mode touch ownership during development, use a stable signed local build. Unsigned or ad-hoc rebuilt app bundles can cause macOS Input Monitoring/TCC to treat the app as a different binary and break the XENEON HID seize path.
+- If the XENEON starts moving the main-display cursor again, first verify Input Monitoring for the current `dist/MyCue.app`, then rerun `bash scripts/verify-touch-seize.sh dist/MyCue.app open`.
 - System stats now come from the native host using safe non-privileged macOS APIs. Advanced sensor telemetry such as direct CPU/GPU temperatures, fan RPM, and GPU utilization still needs a deeper native integration path.
 
 ## Layout
@@ -45,5 +48,10 @@ node --test devkit/test
 
 - Run `./scripts/build-alpha.sh` to create `dist/MyCue.app` and `dist/MyCue-alpha.zip`
 - Set `MYCUE_CODESIGN_IDENTITY` if you want the bundle signed during packaging
+- For local development, prefer the signed flow:
+  - `bash scripts/setup-local-dev-signing.sh`
+  - `MYCUE_CODESIGN_IDENTITY="MyCue Local Dev" ./scripts/build-alpha.sh`
+- Local dev signing notes are in `docs/local-dev-signing.md`
+- HID seize QA is in `scripts/verify-touch-seize.sh`
 - Release prep notes are in `docs/release.md`
 - The manual alpha QA checklist is in `docs/alpha-checklist.md`

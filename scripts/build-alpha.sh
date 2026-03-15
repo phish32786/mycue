@@ -57,6 +57,8 @@ cat > "${CONTENTS_DIR}/Info.plist" <<PLIST
   <string>MyCue</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
+  <key>NSPrincipalClass</key>
+  <string>NSApplication</string>
   <key>CFBundleShortVersionString</key>
   <string>${APP_VERSION}</string>
   <key>CFBundleVersion</key>
@@ -65,6 +67,10 @@ cat > "${CONTENTS_DIR}/Info.plist" <<PLIST
   <string>public.app-category.utilities</string>
   <key>LSMinimumSystemVersion</key>
   <string>14.0</string>
+  <key>NSSupportsAutomaticTermination</key>
+  <false/>
+  <key>NSSupportsSuddenTermination</key>
+  <false/>
   <key>NSHighResolutionCapable</key>
   <true/>
 </dict>

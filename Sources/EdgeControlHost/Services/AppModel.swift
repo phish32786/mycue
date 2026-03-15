@@ -77,7 +77,6 @@ public final class AppModel: ObservableObject {
         guard !hasStarted else { return }
         hasStarted = true
         refreshDisplays()
-        startHardwareIfNeeded()
         systemMetricsService.start()
         startPluginRuntime()
     }

@@ -3,7 +3,7 @@ import SwiftUI
 
 @MainActor
 public final class SettingsWindowController {
-    private weak var window: NSWindow?
+    private var window: NSWindow?
     private weak var model: AppModel?
 
     public init() {}

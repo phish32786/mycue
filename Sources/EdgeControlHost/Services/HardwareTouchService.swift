@@ -4,6 +4,31 @@ import Foundation
 import IOKit.hid
 import SwiftUI
 
+private enum TouchLogger {
+    private static let logURL: URL = {
+        let base = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first
+            ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library", isDirectory: true)
+        let directory = base.appendingPathComponent("Logs/MyCue", isDirectory: true)
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        return directory.appendingPathComponent("touch.log")
+    }()
+
+    static func log(_ message: String) {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let line = "[\(formatter.string(from: Date()))] \(message)\n"
+        guard let data = line.data(using: .utf8) else { return }
+        if FileManager.default.fileExists(atPath: logURL.path),
+           let handle = try? FileHandle(forWritingTo: logURL) {
+            _ = try? handle.seekToEnd()
+            try? handle.write(contentsOf: data)
+            try? handle.close()
+            return
+        }
+        try? data.write(to: logURL, options: .atomic)
+    }
+}
+
 @MainActor
 protocol TouchInputSource: AnyObject {
     var onSample: ((RawTouchSample) -> Void)? { get set }
@@ -23,6 +48,7 @@ final class HIDTouchInputSource: NSObject, TouchInputSource {
     func start() {
         guard !started else { return }
         started = true
+        TouchLogger.log("touch source start")
 
         let matching: [String: Any] = [
             kIOHIDVendorIDKey as String: 10176,
@@ -40,11 +66,14 @@ final class HIDTouchInputSource: NSObject, TouchInputSource {
         }, Unmanaged.passUnretained(self).toOpaque())
 
         let result = IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeSeizeDevice))
-        onOpenStatus?(result == kIOReturnSuccess ? "seize active" : "seize failed (\(result))")
+        let status = result == kIOReturnSuccess ? "seize active" : "seize failed (\(result))"
+        TouchLogger.log(status)
+        onOpenStatus?(status)
     }
 
     func stop() {
         guard started else { return }
+        TouchLogger.log("touch source stop")
         IOHIDManagerUnscheduleFromRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
         IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
         started = false
@@ -86,6 +115,7 @@ public final class HardwareTouchService: ObservableObject {
 
     public func start() {
         stop()
+        TouchLogger.log("hardware touch service start")
 
         if let saved = CalibrationPersistence.load() {
             calibration = saved
@@ -116,6 +146,7 @@ public final class HardwareTouchService: ObservableObject {
     }
 
     public func stop() {
+        TouchLogger.log("hardware touch service stop")
         timer?.invalidate()
         timer = nil
         touchSource?.stop()

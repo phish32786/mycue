@@ -3,7 +3,7 @@
 ## Build and launch
 
 - Build the app with `swift build` and `swift test`
-- Build the distributable app with `./scripts/build-alpha.sh`
+- Build the distributable app with `MYCUE_CODESIGN_IDENTITY="MyCue Local Dev" ./scripts/build-alpha.sh`
 - Launch `dist/MyCue.app` outside the repo root
 - Verify the Node plugin runtime starts from bundled resources
 - Verify settings still open on the main display
@@ -14,10 +14,12 @@
 - Verify MyCue opens on the XENEON instead of the built-in display
 - Verify kiosk/full-screen presentation on the XENEON
 - Verify touch input does not click through to the main display
+- Verify `bash scripts/verify-touch-seize.sh dist/MyCue.app open` passes
 - Verify existing calibration is reused when valid
 - Verify `Reset calibration` restarts the corner flow
 - Verify unplug/replug recovery using `Retry hardware`
 - Verify `Restart touch` restores input after HID interruption
+- Verify relaunch does not require re-approving Input Monitoring for the same signed build
 
 ## DevKit mode
 

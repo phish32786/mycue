@@ -62,6 +62,11 @@ public final class PluginHostController {
 
         let runtimeURL = resolvedRuntimeURL()
         let pluginsURL = resolvedPluginsURL()
+        guard let nodeURL = resolvedNodeExecutableURL() else {
+            callbacks.onLog(PluginLogEvent(level: "error", message: "Node runtime not found. Install Node.js or bundle a node executable."))
+            callbacks.onSnapshots(Self.mockSnapshots())
+            return
+        }
 
         guard FileManager.default.fileExists(atPath: runtimeURL.path) else {
             callbacks.onLog(PluginLogEvent(level: "error", message: "Node runtime not found at \(runtimeURL.path)"))
@@ -72,8 +77,8 @@ public final class PluginHostController {
         let process = Process()
         let stdoutPipe = Pipe()
         let stdinPipe = Pipe()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        process.arguments = ["node", runtimeURL.path]
+        process.executableURL = nodeURL
+        process.arguments = [runtimeURL.path]
         process.standardOutput = stdoutPipe
         process.standardInput = stdinPipe
         process.standardError = stdoutPipe
@@ -150,10 +155,16 @@ public final class PluginHostController {
     }
 
     private func send<T: Encodable>(command: String, payload: T) throws {
+        guard let process, process.isRunning else {
+            throw PluginHostError.runtimeUnavailable
+        }
         let envelope = HostCommandEnvelope(command: command, payload: try JSONValue(encodable: payload))
         let data = try encoder.encode(envelope)
         guard let line = String(data: data, encoding: .utf8)?.appending("\n").data(using: .utf8) else { return }
-        stdinPipe?.fileHandleForWriting.write(line)
+        guard let stdinPipe else {
+            throw PluginHostError.runtimeUnavailable
+        }
+        try stdinPipe.fileHandleForWriting.write(contentsOf: line)
     }
 
     private func consume(_ data: Data) {
@@ -259,5 +270,38 @@ public final class PluginHostController {
 
         return URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
             .appendingPathComponent("plugins", isDirectory: true)
+    }
+
+    private func resolvedNodeExecutableURL() -> URL? {
+        let fileManager = FileManager.default
+
+        let candidates = [
+            Bundle.main.resourceURL?
+                .appendingPathComponent("Runtime", isDirectory: true)
+                .appendingPathComponent("node", isDirectory: false),
+            URL(fileURLWithPath: "/opt/homebrew/bin/node"),
+            URL(fileURLWithPath: "/usr/local/bin/node"),
+            URL(fileURLWithPath: "/usr/bin/node")
+        ].compactMap { $0 }
+
+        if let envPath = ProcessInfo.processInfo.environment["MYCUE_NODE_PATH"], !envPath.isEmpty {
+            let envURL = URL(fileURLWithPath: envPath)
+            if fileManager.isExecutableFile(atPath: envURL.path) {
+                return envURL
+            }
+        }
+
+        return candidates.first(where: { fileManager.isExecutableFile(atPath: $0.path) })
+    }
+}
+
+private enum PluginHostError: LocalizedError {
+    case runtimeUnavailable
+
+    var errorDescription: String? {
+        switch self {
+        case .runtimeUnavailable:
+            return "Plugin runtime is unavailable"
+        }
     }
 }
