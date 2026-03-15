@@ -7,4 +7,6 @@ DerivedData/
 *.xcuserstate
 *.xcworkspace
 *.xcuserdatad
-
+.tmp/
+Resources/
+docs/assets/icon-composer/

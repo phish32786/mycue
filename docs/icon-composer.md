@@ -1,31 +1,22 @@
 # Icon Composer Handoff
 
-MyCue now has prepared layered source assets for Apple Icon Composer in:
+MyCue now keeps the Apple Icon Composer asset directly in:
 
-- `docs/assets/icon-composer/layer-01-shell.png`
-- `docs/assets/icon-composer/layer-02-grid.png`
-- `docs/assets/icon-composer/layer-03-monogram.png`
-- `docs/assets/icon-composer/layer-04-accent.png`
-
-Generate or refresh them with:
-
-```bash
-bash scripts/generate-icon-composer-layers.sh
-```
+- `docs/assets/MyCue.icon`
 
 Why this exists:
 
 - Apple’s new Icon Composer workflow uses a new multi-layer icon file type that integrates with Xcode.
 - The official workflow is tool-driven through Icon Composer/Xcode rather than a stable, documented text format that should be hand-authored from shell scripts.
-- MyCue therefore keeps a flattened `.icns` fallback for the current SwiftPM packaging path, plus these layered source assets for the real Icon Composer asset.
+- MyCue therefore keeps a flattened `.icns` fallback for the current SwiftPM packaging path, but the Composer asset is the source of truth.
 
 Recommended next step on a Mac with Icon Composer:
 
 1. Open Icon Composer.
 2. Create a new icon.
-3. Import the four prepared layers in order.
+3. Edit the existing `docs/assets/MyCue.icon` asset.
 4. Tune the Liquid Glass properties lightly.
-5. Save the Composer asset as `docs/assets/MyCue.icon`.
+5. Save it back to `docs/assets/MyCue.icon`.
 
 Current repo behavior:
 
