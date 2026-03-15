@@ -94,13 +94,13 @@ struct TouchInteractionOverlay: View {
                         handleLayoutDragSample()
                     }
 
-                if let point = model.touchState.mappedPoint {
+                if model.settings.debugMode, let point = model.touchState.mappedPoint {
                     Circle()
                         .fill(model.touchState.isPressed ? Color(red: 0.40, green: 0.95, blue: 0.71) : Color(red: 0.97, green: 0.53, blue: 0.45))
                         .frame(width: 22, height: 22)
                         .overlay(Circle().stroke(.white.opacity(0.7), lineWidth: 2))
                         .position(point)
-                        .opacity(model.settings.debugMode ? 0.92 : 0.45)
+                        .opacity(0.92)
                         .allowsHitTesting(false)
                 }
             }
