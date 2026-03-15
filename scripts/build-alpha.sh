@@ -15,6 +15,7 @@ ZIP_PATH="${DIST_DIR}/${APP_NAME}-alpha.zip"
 EXECUTABLE_NAME="edge-control"
 EXECUTABLE_PATH="${BUILD_DIR}/${EXECUTABLE_NAME}"
 SIGN_IDENTITY="${MYCUE_CODESIGN_IDENTITY:-}"
+SIGN_KEYCHAIN="${MYCUE_CODESIGN_KEYCHAIN:-}"
 BUNDLE_IDENTIFIER="${MYCUE_BUNDLE_IDENTIFIER:-com.mycue.alpha}"
 APP_VERSION="${MYCUE_APP_VERSION:-0.1.0-alpha}"
 BUILD_NUMBER="${MYCUE_BUILD_NUMBER:-1}"
@@ -85,7 +86,11 @@ PLIST
 
 if [[ -n "${SIGN_IDENTITY}" ]]; then
   echo "==> Codesigning app bundle"
-  codesign --force --deep --options runtime --sign "${SIGN_IDENTITY}" "${APP_DIR}"
+  codesign_args=(--force --deep --options runtime --sign "${SIGN_IDENTITY}")
+  if [[ -n "${SIGN_KEYCHAIN}" ]]; then
+    codesign_args+=(--keychain "${SIGN_KEYCHAIN}")
+  fi
+  codesign "${codesign_args[@]}" "${APP_DIR}"
 else
   echo "==> Skipping codesign (set MYCUE_CODESIGN_IDENTITY to sign)"
 fi

@@ -24,6 +24,7 @@ jobs:
       MYCUE_APP_VERSION: ${{ github.event.inputs.app_version || '0.1.0-alpha' }}
       MYCUE_BUILD_NUMBER: ${{ github.event.inputs.build_number || github.run_number }}
       MYCUE_CODESIGN_IDENTITY: ${{ secrets.APPLE_DEVELOPER_IDENTITY }}
+      MYCUE_CODESIGN_KEYCHAIN: ${{ runner.temp }}/build.keychain-db
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       APPLE_KEY_ID: ${{ secrets.APPLE_NOTARY_KEY_ID }}
       APPLE_ISSUER_ID: ${{ secrets.APPLE_NOTARY_ISSUER_ID }}
@@ -55,14 +56,14 @@ jobs:
           KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
           CERT_PASSWORD: ${{ secrets.APPLE_DEVELOPER_ID_P12_PASSWORD }}
         run: |
-          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          security list-keychains -d user -s build.keychain login.keychain-db
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          security set-keychain-settings -lut 21600 build.keychain
-          security import signing-cert.p12 -k build.keychain -P "$CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-          security find-identity -v -p codesigning build.keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$MYCUE_CODESIGN_KEYCHAIN"
+          security list-keychains -d user -s "$MYCUE_CODESIGN_KEYCHAIN" login.keychain-db
+          security default-keychain -s "$MYCUE_CODESIGN_KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$MYCUE_CODESIGN_KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$MYCUE_CODESIGN_KEYCHAIN"
+          security import signing-cert.p12 -k "$MYCUE_CODESIGN_KEYCHAIN" -P "$CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$MYCUE_CODESIGN_KEYCHAIN"
+          security find-identity -v -p codesigning "$MYCUE_CODESIGN_KEYCHAIN"
 
       - name: Build signed alpha bundle
         run: bash scripts/build-alpha.sh
