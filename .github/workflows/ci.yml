@@ -32,7 +32,7 @@ jobs:
       - name: Run DevKit tests
         run: node --test devkit/test/*.test.mjs
 
-  alpha-package-smoke:
+  package-smoke:
     runs-on: macos-15
 
     steps:
@@ -44,20 +44,22 @@ jobs:
         with:
           node-version: 22
 
-      - name: Build alpha bundle
+      - name: Build release bundle
         run: bash scripts/build-alpha.sh
 
-      - name: Verify alpha artifacts
+      - name: Verify release artifacts
         run: |
-          test -f dist/MyCue-alpha.zip
+          test -f dist/MyCue.zip
+          test -f dist/MyCue.dmg
           test -x dist/MyCue.app/Contents/MacOS/MyCue
           test -f dist/MyCue.app/Contents/Resources/Runtime/node-host/src/host.mjs
           test -f dist/MyCue.app/Contents/Resources/Plugins/spotify/plugin.json
 
-      - name: Upload alpha artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v5
         with:
-          name: mycue-alpha-unsigned
+          name: mycue-unsigned
           path: |
             dist/MyCue.app
-            dist/MyCue-alpha.zip
+            dist/MyCue.zip
+            dist/MyCue.dmg

@@ -1,10 +1,10 @@
-name: Alpha Package
+name: Package
 
 on:
   workflow_dispatch:
   push:
     tags:
-      - "alpha-*"
+      - "v*"
 
 jobs:
   package:
@@ -19,14 +19,15 @@ jobs:
         with:
           node-version: 22
 
-      - name: Build alpha bundle
+      - name: Build release bundle
         run: bash scripts/build-alpha.sh
 
-      - name: Upload alpha artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v5
         with:
-          name: mycue-alpha-unsigned
+          name: mycue-unsigned
           path: |
             dist/MyCue.app
-            dist/MyCue-alpha.zip
+            dist/MyCue.zip
+            dist/MyCue.dmg
           if-no-files-found: error

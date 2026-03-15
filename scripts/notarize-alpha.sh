@@ -4,7 +4,8 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${ROOT_DIR}/dist"
 APP_PATH="${1:-${DIST_DIR}/MyCue.app}"
-ZIP_PATH="${2:-${DIST_DIR}/MyCue-alpha.zip}"
+ZIP_PATH="${2:-${DIST_DIR}/MyCue.zip}"
+DMG_PATH="${3:-${DIST_DIR}/MyCue.dmg}"
 
 APPLE_TEAM_ID="${APPLE_TEAM_ID:-}"
 APPLE_NOTARY_KEY_ID="${APPLE_NOTARY_KEY_ID:-}"
@@ -64,11 +65,15 @@ echo "==> Repacking stapled zip"
 rm -f "${ZIP_PATH}"
 ditto -c -k --sequesterRsrc --keepParent "${APP_PATH}" "${ZIP_PATH}"
 
+echo "==> Rebuilding DMG"
+bash "${ROOT_DIR}/scripts/create-dmg.sh" "${APP_PATH}" "${DMG_PATH}"
+
 echo "==> Final verification"
 codesign --verify --deep --strict --verbose=2 "${APP_PATH}"
 spctl -a -vv "${APP_PATH}" || true
 
 echo
-echo "Notarized artifacts:"
+echo "Release artifacts:"
 echo "  App: ${APP_PATH}"
 echo "  Zip: ${ZIP_PATH}"
+echo "  DMG: ${DMG_PATH}"

@@ -1,27 +1,27 @@
-name: Signed Alpha
+name: Signed Release
 
 on:
   workflow_dispatch:
     inputs:
       app_version:
-        description: App version for the alpha bundle
+        description: App version for the release bundle
         required: false
-        default: 0.1.0-alpha
+        default: 0.1.0
       build_number:
         description: Build number
         required: false
         default: "1"
   push:
     tags:
-      - "signed-alpha-*"
+      - "v*"
 
 jobs:
-  signed-alpha:
+  signed-release:
     runs-on: macos-15
 
     env:
-      MYCUE_BUNDLE_IDENTIFIER: com.mycue.alpha
-      MYCUE_APP_VERSION: ${{ github.event.inputs.app_version || '0.1.0-alpha' }}
+      MYCUE_BUNDLE_IDENTIFIER: com.mycue
+      MYCUE_APP_VERSION: ${{ github.event.inputs.app_version || '0.1.0' }}
       MYCUE_BUILD_NUMBER: ${{ github.event.inputs.build_number || github.run_number }}
       MYCUE_CODESIGN_IDENTITY: ${{ secrets.APPLE_DEVELOPER_IDENTITY }}
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -66,16 +66,16 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$MYCUE_CODESIGN_KEYCHAIN"
           security find-identity -v -p codesigning "$MYCUE_CODESIGN_KEYCHAIN"
 
-      - name: Build signed alpha bundle
+      - name: Build signed release bundle
         run: bash scripts/build-alpha.sh
 
       - name: Verify signature
         run: |
           codesign --verify --deep --strict --verbose=2 dist/MyCue.app
 
-      - name: Notarize alpha zip
+      - name: Notarize release zip
         run: |
-          xcrun notarytool submit dist/MyCue-alpha.zip \
+          xcrun notarytool submit dist/MyCue.zip \
             --key "$HOME/.private_keys/AuthKey_${APPLE_KEY_ID}.p8" \
             --key-id "$APPLE_KEY_ID" \
             --issuer "$APPLE_ISSUER_ID" \
@@ -88,16 +88,17 @@ jobs:
           codesign --verify --deep --strict --verbose=2 dist/MyCue.app
           spctl -a -vv dist/MyCue.app
 
-      - name: Repack stapled alpha zip
+      - name: Repack stapled release zip
         run: |
-          rm -f dist/MyCue-alpha.zip
-          ditto -c -k --sequesterRsrc --keepParent dist/MyCue.app dist/MyCue-alpha.zip
+          rm -f dist/MyCue.zip
+          ditto -c -k --sequesterRsrc --keepParent dist/MyCue.app dist/MyCue.zip
 
-      - name: Upload signed alpha artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload signed release artifact
+        uses: actions/upload-artifact@v5
         with:
-          name: mycue-alpha-signed
+          name: mycue-signed
           path: |
             dist/MyCue.app
-            dist/MyCue-alpha.zip
+            dist/MyCue.zip
+            dist/MyCue.dmg
           if-no-files-found: error

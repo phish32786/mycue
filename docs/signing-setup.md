@@ -1,6 +1,6 @@
 # Apple Signing Setup
 
-This is the shortest path to getting the `Signed Alpha` workflow working for MyCue.
+This is the shortest path to getting the signed release workflow working for MyCue.
 
 ## Privacy note
 
@@ -108,7 +108,7 @@ This uploads the secrets directly to the configured GitHub repo using `gh secret
 
 In GitHub Actions:
 
-1. Open `Signed Alpha`
+1. Open the signed release workflow
 2. Click `Run workflow`
 3. Optionally set:
    - `app_version`

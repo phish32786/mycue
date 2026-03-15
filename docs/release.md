@@ -1,8 +1,8 @@
 # Release Prep
 
-## Alpha build path
+## Package build path
 
-MyCue now has a self-contained alpha packaging script:
+MyCue now has a self-contained packaging script:
 
 ```bash
 ./scripts/build-alpha.sh
@@ -14,9 +14,10 @@ This script:
 - creates `dist/MyCue.app`
 - copies the Node runtime into `Contents/Resources/Runtime`
 - copies plugins into `Contents/Resources/Plugins`
-- generates a minimal `Info.plist`
+- generates `Resources/AppIcon.icns`
 - optionally signs the app if `MYCUE_CODESIGN_IDENTITY` is set
-- creates `dist/MyCue-alpha.zip`
+- creates `dist/MyCue.zip`
+- creates `dist/MyCue.dmg`
 
 ## Local notarization path
 
@@ -33,33 +34,31 @@ bash scripts/notarize-alpha.sh
 This script:
 
 - verifies the signed app bundle
-- submits `dist/MyCue-alpha.zip` with `notarytool`
+- submits `dist/MyCue.zip` with `notarytool`
 - staples the returned ticket to `dist/MyCue.app`
-- repacks `dist/MyCue-alpha.zip` from the stapled app
+- rebuilds `dist/MyCue.dmg` from the stapled app
 - reruns local signature checks
 
 ## GitHub Actions
 
-The repo now includes two workflows:
+The repo includes these packaging workflows:
 
 - `.github/workflows/ci.yml`
   - builds and tests the Swift host
   - validates plugin manifests
   - runs the DevKit Node tests
-  - performs a smoke alpha packaging build and uploads the unsigned artifact
+  - performs a smoke package build and uploads the unsigned artifacts
 - `.github/workflows/alpha-package.yml`
-  - manual or tag-driven alpha packaging
-  - uploads `MyCue.app` and `MyCue-alpha.zip` as workflow artifacts
+  - manual or tag-driven package build
+  - uploads `MyCue.app`, `MyCue.zip`, and `MyCue.dmg`
 - `.github/workflows/signed-alpha.yml`
-  - manual or tag-driven signed alpha packaging
+  - manual or tag-driven signed release build
   - imports a Developer ID certificate
   - builds a signed app bundle
   - submits the zip to Apple notarytool
   - staples the app
-  - repacks the stapled zip
-  - uploads the signed alpha artifacts
-
-## GitHub secrets for signing
+  - repacks the zip
+  - uploads the signed release artifacts
 
 ## Repository hygiene
 
@@ -69,43 +68,37 @@ Keep personal identifiers out of tracked repo content:
 - keep examples generic, for example `Your Name (TEAMID)`, `TEAMID`, `KEYID12345`, and `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
 - keep real signing and notarization values in local environment variables, untracked files, or GitHub Actions secrets only
 
-The signed alpha workflow expects these repository secrets:
+## GitHub secrets for signing
+
+The signed release workflow expects these repository secrets:
 
 - `APPLE_DEVELOPER_IDENTITY`
-  - example: `Developer ID Application: Your Name (TEAMID)`
 - `APPLE_DEVELOPER_ID_P12_BASE64`
-  - base64 of the exported Developer ID Application `.p12`
 - `APPLE_DEVELOPER_ID_P12_PASSWORD`
-  - password used when exporting the `.p12`
 - `APPLE_KEYCHAIN_PASSWORD`
-  - temporary CI keychain password
 - `APPLE_TEAM_ID`
-  - your Apple Developer team ID
 - `APPLE_NOTARY_KEY_ID`
-  - App Store Connect API key ID for notarization
 - `APPLE_NOTARY_ISSUER_ID`
-  - App Store Connect issuer ID
 - `APPLE_NOTARY_API_KEY_P8_BASE64`
-  - base64 of the notarization `.p8` API key
 
 Detailed setup instructions are in `docs/signing-setup.md`.
 
-## Optional signing
+## Build examples
 
-Unsigned alpha build:
+Unsigned package build:
 
 ```bash
 ./scripts/build-alpha.sh
 ```
 
-Signed alpha build:
+Signed package build:
 
 ```bash
 export MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)"
 ./scripts/build-alpha.sh
 ```
 
-Signed + notarized alpha build:
+Signed + notarized package build:
 
 ```bash
 export MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)"
@@ -119,15 +112,13 @@ bash scripts/notarize-alpha.sh
 
 ## Current limits
 
-- No DMG generation yet
-- No hardened runtime entitlements file yet
-- Bundle identifier and version still default to alpha placeholders unless overridden by env vars
-- Login item registration is still a saved preference only
-- GitHub Actions can now produce unsigned or signed alpha artifacts, depending on which workflow you run
+- workflow filenames still use legacy names in a few places
+- DMG packaging is drag-to-Applications and intentionally simple
+- bundle identifier and version still default to placeholders unless overridden by env vars
 
-## Before external alpha distribution
+## Before external distribution
 
-- replace `com.mycue.alpha` with the real bundle identifier
+- replace `com.mycue` with the real bundle identifier if needed
 - set the real app version/build number in workflow inputs or release env vars
 - verify first-run behavior on a clean macOS machine
-- verify Node runtime launch inside the app bundle on a non-repo path
+- verify bundled runtime launch on a non-repo path
