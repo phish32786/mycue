@@ -7,7 +7,7 @@ struct EdgeControlExecutableApp: App {
     @StateObject private var model = AppModel()
 
     var body: some Scene {
-        WindowGroup("MyCue Dashboard") {
+        Window("MyCue Dashboard", id: "dashboard") {
             RootDashboardView()
                 .environmentObject(model)
         }
