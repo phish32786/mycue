@@ -61,6 +61,14 @@ The repo now includes two workflows:
 
 ## GitHub secrets for signing
 
+## Repository hygiene
+
+Keep personal identifiers out of tracked repo content:
+
+- do not commit real names, team IDs, key IDs, issuer IDs, email addresses, or machine names into docs or helper scripts
+- keep examples generic, for example `Your Name (TEAMID)`, `TEAMID`, `KEYID12345`, and `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
+- keep real signing and notarization values in local environment variables, untracked files, or GitHub Actions secrets only
+
 The signed alpha workflow expects these repository secrets:
 
 - `APPLE_DEVELOPER_IDENTITY`

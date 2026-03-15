@@ -2,6 +2,15 @@
 
 This is the shortest path to getting the `Signed Alpha` workflow working for MyCue.
 
+## Privacy note
+
+Keep real signing identities and notarization identifiers out of committed repo content.
+Use placeholders in docs and scripts, and keep the real values in:
+
+- local environment variables
+- untracked files
+- GitHub Actions secrets
+
 ## 1. Create a Developer ID Application certificate
 
 Use Apple’s Developer ID certificate flow and create a `Developer ID Application` certificate, then install it into your Mac’s keychain.
