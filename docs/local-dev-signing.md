@@ -17,7 +17,7 @@ Create a stable local code-signing identity and use it every time you build `dis
 ## Current build command
 
 ```bash
-MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" bash scripts/build-alpha.sh
+MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" bash scripts/build-release.sh
 ```
 
 The packaging script already supports signing. It only needs a valid identity in your login keychain.
@@ -58,13 +58,14 @@ You should see a valid identity for one of:
 ## Build a signed local app
 
 ```bash
-MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" bash scripts/build-alpha.sh
+MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" bash scripts/build-release.sh
 ```
 
 Output:
 
 - `dist/MyCue.app`
-- `dist/MyCue-alpha.zip`
+- `dist/MyCue.zip`
+- `dist/MyCue.dmg`
 
 ## Recommended TCC / Input Monitoring flow
 
@@ -74,7 +75,7 @@ For XENEON hardware testing, use this flow after local signing is set up:
 2. Build a signed local app:
 
 ```bash
-MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" bash scripts/build-alpha.sh
+MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" bash scripts/build-release.sh
 ```
 
 3. Launch `dist/MyCue.app`.

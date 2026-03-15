@@ -64,6 +64,6 @@ Next steps:
 3. Verify with:
    security find-identity -v -p codesigning
 4. Build a signed app with:
-   MYCUE_CODESIGN_IDENTITY="${CERT_NAME}" bash scripts/build-alpha.sh
+   MYCUE_CODESIGN_IDENTITY="${CERT_NAME}" bash scripts/build-release.sh
 
 EOF

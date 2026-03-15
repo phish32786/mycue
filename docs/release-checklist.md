@@ -1,10 +1,10 @@
-# Alpha Checklist
+# Release Checklist
 
 ## Build and launch
 
 - Build the app with `swift build` and `swift test`
-- Build the distributable app with `MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" ./scripts/build-alpha.sh`
-- Notarize and staple it with `bash scripts/notarize-alpha.sh`
+- Build the distributable app with `MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" ./scripts/build-release.sh`
+- Notarize and staple it with `bash scripts/notarize-release.sh`
 - Launch `dist/MyCue.app` outside the repo root
 - Verify the Node plugin runtime starts from bundled resources
 - Verify settings still open on the main display

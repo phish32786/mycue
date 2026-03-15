@@ -20,7 +20,7 @@ jobs:
           node-version: 22
 
       - name: Build release bundle
-        run: bash scripts/build-alpha.sh
+        run: bash scripts/build-release.sh
 
       - name: Upload release artifact
         uses: actions/upload-artifact@v5

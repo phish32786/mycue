@@ -67,7 +67,7 @@ jobs:
           security find-identity -v -p codesigning "$MYCUE_CODESIGN_KEYCHAIN"
 
       - name: Build signed release bundle
-        run: bash scripts/build-alpha.sh
+        run: bash scripts/build-release.sh
 
       - name: Verify signature
         run: |

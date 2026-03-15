@@ -18,13 +18,13 @@ This repository currently contains the first production-oriented scaffold:
 swift build
 swift test
 swift run edge-control
-MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" ./scripts/build-alpha.sh
+MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" ./scripts/build-release.sh
 node runtime/node-host/src/host.mjs
 node devkit/src/preview.mjs --plugin system-stats
 node devkit/src/validate.mjs
 node --test devkit/test
 bash scripts/verify-touch-seize.sh dist/MyCue.app open
-bash scripts/notarize-alpha.sh
+bash scripts/notarize-release.sh
 ```
 
 ## Current assumptions
@@ -45,18 +45,18 @@ bash scripts/notarize-alpha.sh
 - `devkit`: preview runner, mocks, and validation tooling
 - `docs`: architecture, roadmap, plugin API, DevKit, debug mode, and workflow notes
 
-## Alpha packaging
+## Packaging
 
-- Run `./scripts/build-alpha.sh` to create `dist/MyCue.app` and `dist/MyCue-alpha.zip`
+- Run `./scripts/build-release.sh` to create `dist/MyCue.app`, `dist/MyCue.zip`, and `dist/MyCue.dmg`
 - Set `MYCUE_CODESIGN_IDENTITY` if you want the bundle signed during packaging
 - For local development, prefer the signed flow with a stable identity:
   - `bash scripts/setup-local-dev-signing.sh`
-  - `MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" ./scripts/build-alpha.sh`
+  - `MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" ./scripts/build-release.sh`
 - If the real Developer ID certificate is not available on this Mac, fall back to:
-  - `MYCUE_CODESIGN_IDENTITY="MyCue Local Dev" ./scripts/build-alpha.sh`
+  - `MYCUE_CODESIGN_IDENTITY="MyCue Local Dev" ./scripts/build-release.sh`
 - Local dev signing notes are in `docs/local-dev-signing.md`
 - HID seize QA is in `scripts/verify-touch-seize.sh`
-- Local notarization helper is in `scripts/notarize-alpha.sh`
+- Local notarization helper is in `scripts/notarize-release.sh`
 - Release prep notes are in `docs/release.md`
 - Icon Composer handoff notes are in `docs/icon-composer.md`
-- The manual alpha QA checklist is in `docs/alpha-checklist.md`
+- The manual release QA checklist is in `docs/release-checklist.md`

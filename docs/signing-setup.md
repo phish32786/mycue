@@ -147,7 +147,7 @@ Before wiring GitHub secrets, validate notarization on this Mac:
 
 ```bash
 export MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)"
-bash scripts/build-alpha.sh
+bash scripts/build-release.sh
 ```
 
 2. Save the notarization key somewhere local, for example:
@@ -169,7 +169,7 @@ export APPLE_NOTARY_API_KEY_PATH="$HOME/.private_keys/AuthKey_KEYID12345.p8"
 4. Run the local notarization helper:
 
 ```bash
-bash scripts/notarize-alpha.sh
+bash scripts/notarize-release.sh
 ```
 
 5. Validate the result:

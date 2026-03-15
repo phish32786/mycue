@@ -5,7 +5,7 @@
 MyCue now has a self-contained packaging script:
 
 ```bash
-./scripts/build-alpha.sh
+./scripts/build-release.sh
 ```
 
 This script:
@@ -28,7 +28,7 @@ export APPLE_TEAM_ID="TEAMID"
 export APPLE_NOTARY_KEY_ID="YOUR_KEY_ID"
 export APPLE_NOTARY_ISSUER_ID="YOUR_ISSUER_ID"
 export APPLE_NOTARY_API_KEY_PATH="$HOME/.private_keys/AuthKey_YOUR_KEY_ID.p8"
-bash scripts/notarize-alpha.sh
+bash scripts/notarize-release.sh
 ```
 
 This script:
@@ -48,10 +48,10 @@ The repo includes these packaging workflows:
   - validates plugin manifests
   - runs the DevKit Node tests
   - performs a smoke package build and uploads the unsigned artifacts
-- `.github/workflows/alpha-package.yml`
+- `.github/workflows/package.yml`
   - manual or tag-driven package build
   - uploads `MyCue.app`, `MyCue.zip`, and `MyCue.dmg`
-- `.github/workflows/signed-alpha.yml`
+- `.github/workflows/signed-release.yml`
   - manual or tag-driven signed release build
   - imports a Developer ID certificate
   - builds a signed app bundle
@@ -88,14 +88,14 @@ Detailed setup instructions are in `docs/signing-setup.md`.
 Unsigned package build:
 
 ```bash
-./scripts/build-alpha.sh
+./scripts/build-release.sh
 ```
 
 Signed package build:
 
 ```bash
 export MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)"
-./scripts/build-alpha.sh
+./scripts/build-release.sh
 ```
 
 Signed + notarized package build:
@@ -106,8 +106,8 @@ export APPLE_TEAM_ID="TEAMID"
 export APPLE_NOTARY_KEY_ID="YOUR_KEY_ID"
 export APPLE_NOTARY_ISSUER_ID="YOUR_ISSUER_ID"
 export APPLE_NOTARY_API_KEY_PATH="$HOME/.private_keys/AuthKey_YOUR_KEY_ID.p8"
-./scripts/build-alpha.sh
-bash scripts/notarize-alpha.sh
+./scripts/build-release.sh
+bash scripts/notarize-release.sh
 ```
 
 ## Current limits
