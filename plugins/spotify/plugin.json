@@ -1,0 +1,10 @@
+{
+  "id": "spotify",
+  "name": "Spotify",
+  "version": "0.1.0",
+  "apiVersion": "1.0.0",
+  "kind": "spotify",
+  "entry": "index.mjs",
+  "permissions": ["mediaControl"],
+  "defaultEnabled": true
+}

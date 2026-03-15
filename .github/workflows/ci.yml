@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Swift build
+        run: swift build
+
+      - name: Swift test
+        run: swift test
+
+      - name: Validate plugin manifests
+        run: node devkit/src/validate.mjs
+
+      - name: Run DevKit tests
+        run: node --test devkit/test/*.test.mjs
+
+  alpha-package-smoke:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build alpha bundle
+        run: bash scripts/build-alpha.sh
+
+      - name: Verify alpha artifacts
+        run: |
+          test -f dist/MyCue-alpha.zip
+          test -x dist/MyCue.app/Contents/MacOS/MyCue
+          test -f dist/MyCue.app/Contents/Resources/Runtime/node-host/src/host.mjs
+          test -f dist/MyCue.app/Contents/Resources/Plugins/spotify/plugin.json
+
+      - name: Upload alpha artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mycue-alpha-unsigned
+          path: |
+            dist/MyCue.app
+            dist/MyCue-alpha.zip
+

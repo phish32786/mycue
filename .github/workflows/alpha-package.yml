@@ -1,0 +1,33 @@
+name: Alpha Package
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "alpha-*"
+
+jobs:
+  package:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build alpha bundle
+        run: bash scripts/build-alpha.sh
+
+      - name: Upload alpha artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mycue-alpha-unsigned
+          path: |
+            dist/MyCue.app
+            dist/MyCue-alpha.zip
+          if-no-files-found: error
+

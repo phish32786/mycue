@@ -1,0 +1,10 @@
+{
+  "id": "system-stats",
+  "name": "System Stats",
+  "version": "0.1.0",
+  "apiVersion": "1.0.0",
+  "kind": "systemStats",
+  "entry": "index.mjs",
+  "permissions": ["systemMetrics"],
+  "defaultEnabled": true
+}
