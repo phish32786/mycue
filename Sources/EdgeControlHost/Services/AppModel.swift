@@ -31,6 +31,7 @@ public final class AppModel: ObservableObject {
     private var hasStarted = false
     private var cancellables: Set<AnyCancellable> = []
     private var dashboardControlsHideWorkItem: DispatchWorkItem?
+    private var screenRefreshWorkItem: DispatchWorkItem?
 
     public init(
         settingsStore: SettingsStore = SettingsStore(),
@@ -71,6 +72,20 @@ public final class AppModel: ObservableObject {
                 self.pluginHost.updateHostMetrics(metrics)
             }
             .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: NSApplication.didChangeScreenParametersNotification)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.scheduleDisplayRefresh(reason: "screen-parameters-changed")
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.recoverHardwareIfNeeded()
+            }
+            .store(in: &cancellables)
     }
 
     public func startIfNeeded() {
@@ -99,9 +114,6 @@ public final class AppModel: ObservableObject {
         let selectedID = selectedScreen?.displayIdentifier
         selectedDisplay = availableDisplays.first(where: { $0.id == selectedID })
         debugOverlay.selectedDisplayName = selectedDisplay?.summary ?? "Unknown"
-        if isDevKitMode {
-            settings.kioskMode = false
-        }
 
         if settings.selectedDisplayID == nil, !isDevKitMode {
             settings.selectedDisplayID = selectedDisplay?.id
@@ -480,6 +492,32 @@ public final class AppModel: ObservableObject {
 
         hardwareTouchService.start()
         syncTouchState()
+    }
+
+    private func scheduleDisplayRefresh(reason: String) {
+        screenRefreshWorkItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            self.debugOverlay.push(
+                log: PluginLogEvent(
+                    level: "info",
+                    pluginID: "__host__",
+                    message: "Display refresh triggered: \(reason)",
+                    timestamp: Date()
+                )
+            )
+            self.refreshDisplays()
+        }
+        screenRefreshWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35, execute: workItem)
+    }
+
+    private func recoverHardwareIfNeeded() {
+        guard !isDevKitMode else { return }
+        let status = touchState.hidStatus.lowercased()
+        if status.contains("failed") || status.contains("partial") || status.contains("no xeneon") || status == "inactive" {
+            restartTouchService()
+        }
     }
 
     private func startPluginRuntime() {

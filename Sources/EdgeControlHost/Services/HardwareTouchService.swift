@@ -44,39 +44,130 @@ final class HIDTouchInputSource: NSObject, TouchInputSource {
     var onOpenStatus: ((String) -> Void)?
     private var sample = RawTouchSample()
     private var started = false
+    private var openedDevices: [IOHIDDevice] = []
 
     func start() {
         guard !started else { return }
         started = true
         TouchLogger.log("touch source start")
 
-        let matching: [String: Any] = [
-            kIOHIDVendorIDKey as String: 10176,
-            kIOHIDProductIDKey as String: 2137,
-            kIOHIDPrimaryUsagePageKey as String: 1,
-            kIOHIDPrimaryUsageKey as String: 2
+        let matchings: [[String: Any]] = [
+            [
+                kIOHIDVendorIDKey as String: 10176,
+                kIOHIDProductIDKey as String: 2137,
+                kIOHIDPrimaryUsagePageKey as String: 1,
+                kIOHIDPrimaryUsageKey as String: 2
+            ],
+            [
+                kIOHIDVendorIDKey as String: 10176,
+                kIOHIDProductIDKey as String: 2137,
+                kIOHIDPrimaryUsagePageKey as String: 13,
+                kIOHIDPrimaryUsageKey as String: 4
+            ],
+            [
+                kIOHIDVendorIDKey as String: 10176,
+                kIOHIDProductIDKey as String: 2137,
+                kIOHIDPrimaryUsagePageKey as String: 65290,
+                kIOHIDPrimaryUsageKey as String: 255
+            ]
         ]
 
-        IOHIDManagerSetDeviceMatching(manager, matching as CFDictionary)
+        IOHIDManagerSetDeviceMatchingMultiple(manager, matchings as CFArray)
         IOHIDManagerScheduleWithRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
         IOHIDManagerRegisterInputValueCallback(manager, { context, _, _, value in
             guard let context else { return }
             let source = Unmanaged<HIDTouchInputSource>.fromOpaque(context).takeUnretainedValue()
             source.handle(value: value)
         }, Unmanaged.passUnretained(self).toOpaque())
+        IOHIDManagerRegisterDeviceMatchingCallback(manager, { context, _, _, _ in
+            guard let context else { return }
+            let source = Unmanaged<HIDTouchInputSource>.fromOpaque(context).takeUnretainedValue()
+            source.openMatchedDevicesIfNeeded()
+        }, Unmanaged.passUnretained(self).toOpaque())
+        IOHIDManagerRegisterDeviceRemovalCallback(manager, { context, _, _, _ in
+            guard let context else { return }
+            let source = Unmanaged<HIDTouchInputSource>.fromOpaque(context).takeUnretainedValue()
+            source.refreshOpenStatus()
+        }, Unmanaged.passUnretained(self).toOpaque())
 
         let result = IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeSeizeDevice))
-        let status = result == kIOReturnSuccess ? "seize active" : "seize failed (\(result))"
-        TouchLogger.log(status)
-        onOpenStatus?(status)
+        if result != kIOReturnSuccess {
+            let status = "manager open failed (\(result))"
+            TouchLogger.log(status)
+            onOpenStatus?(status)
+            return
+        }
+
+        openMatchedDevicesIfNeeded()
     }
 
     func stop() {
         guard started else { return }
         TouchLogger.log("touch source stop")
+        openedDevices.forEach { device in
+            IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
+            IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
+        }
+        openedDevices.removeAll()
         IOHIDManagerUnscheduleFromRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
         IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
         started = false
+    }
+
+    private func openMatchedDevicesIfNeeded() {
+        let devices = ((IOHIDManagerCopyDevices(manager) as? Set<IOHIDDevice>) ?? [])
+            .sorted { lhs, rhs in
+                usageSortKey(lhs) < usageSortKey(rhs)
+            }
+
+        openedDevices = devices.filter { device in
+            guard !openedDevices.contains(where: { $0 === device }) else { return true }
+            IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
+            let result = IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeSeizeDevice))
+            let usage = usageDescription(device)
+            let success = result == kIOReturnSuccess
+            TouchLogger.log("device \(usage) open \(success ? "ok" : "failed (\(result))")")
+            if !success {
+                IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
+            }
+            return success
+        }
+
+        refreshOpenStatus()
+    }
+
+    private func refreshOpenStatus() {
+        let devices = ((IOHIDManagerCopyDevices(manager) as? Set<IOHIDDevice>) ?? [])
+        let held = openedDevices.filter { current in
+            devices.contains(where: { $0 === current })
+        }
+        openedDevices = held
+
+        let total = devices.count
+        let active = held.count
+        let status: String
+        switch (active, total) {
+        case (_, 0):
+            status = "no XENEON HID devices found"
+        case let (active, total) where active == total:
+            status = "seize active (\(active)/\(total))"
+        case (0, let total):
+            status = "seize failed (0/\(total))"
+        default:
+            status = "partial seize (\(active)/\(total))"
+        }
+        TouchLogger.log(status)
+        onOpenStatus?(status)
+    }
+
+    private func usageSortKey(_ device: IOHIDDevice) -> String {
+        usageDescription(device)
+    }
+
+    private func usageDescription(_ device: IOHIDDevice) -> String {
+        let usagePage = (IOHIDDeviceGetProperty(device, kIOHIDPrimaryUsagePageKey as CFString) as? NSNumber)?.intValue ?? -1
+        let usage = (IOHIDDeviceGetProperty(device, kIOHIDPrimaryUsageKey as CFString) as? NSNumber)?.intValue ?? -1
+        return "u\(usagePage):\(usage)"
     }
 
     private func handle(value: IOHIDValue) {
