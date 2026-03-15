@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ICONSET_DIR="${ROOT_DIR}/.build/MyCue.iconset"
 OUTPUT_PATH="${ROOT_DIR}/Resources/AppIcon.icns"
-MASTER_PNG="${ROOT_DIR}/docs/assets/mycue-logo-preview.png"
+MASTER_PNG="${ROOT_DIR}/.build/MyCue-app-icon-master.png"
 COMPOSER_DIR="${ROOT_DIR}/docs/assets/MyCue.icon/Assets"
 
 rm -rf "${ICONSET_DIR}"
