@@ -3,10 +3,13 @@
 ## Build and launch
 
 - Build the app with `swift build` and `swift test`
-- Build the distributable app with `MYCUE_CODESIGN_IDENTITY="MyCue Local Dev" ./scripts/build-alpha.sh`
+- Build the distributable app with `MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" ./scripts/build-alpha.sh`
+- Notarize and staple it with `bash scripts/notarize-alpha.sh`
 - Launch `dist/MyCue.app` outside the repo root
 - Verify the Node plugin runtime starts from bundled resources
 - Verify settings still open on the main display
+- Verify `codesign -dv --verbose=4 dist/MyCue.app` shows the expected Developer ID authority
+- Verify `spctl -a -vv dist/MyCue.app` accepts the notarized app
 
 ## Hardware mode
 

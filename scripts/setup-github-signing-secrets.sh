@@ -27,7 +27,7 @@ fi
 
 P12_PATH="$1"
 P8_PATH="$2"
-REPO="${GITHUB_REPO:-phish32786/mycue}"
+REPO="${GITHUB_REPO:-owner/repo}"
 
 required_vars=(
   APPLE_DEVELOPER_IDENTITY

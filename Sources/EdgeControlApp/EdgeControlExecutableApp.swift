@@ -51,6 +51,10 @@ final class EdgeControlAppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
         NSApp.mainMenu = buildMainMenu()
+        if let iconPath = Bundle.main.path(forResource: "AppIcon", ofType: "icns"),
+           let icon = NSImage(contentsOfFile: iconPath) {
+            NSApp.applicationIconImage = icon
+        }
         dashboardWindowController.show(model: model)
         NSApp.activate(ignoringOtherApps: true)
         NSApp.windows.forEach { window in

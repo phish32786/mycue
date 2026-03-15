@@ -11,6 +11,7 @@ MACOS_DIR="${CONTENTS_DIR}/MacOS"
 RESOURCES_DIR="${CONTENTS_DIR}/Resources"
 RUNTIME_DIR="${RESOURCES_DIR}/Runtime"
 PLUGINS_DIR="${RESOURCES_DIR}/Plugins"
+ICON_SOURCE="${ROOT_DIR}/Resources/AppIcon.icns"
 ZIP_PATH="${DIST_DIR}/${APP_NAME}-alpha.zip"
 EXECUTABLE_NAME="edge-control"
 EXECUTABLE_PATH="${BUILD_DIR}/${EXECUTABLE_NAME}"
@@ -20,6 +21,8 @@ APP_VERSION="${MYCUE_APP_VERSION:-0.1.0-alpha}"
 BUILD_NUMBER="${MYCUE_BUILD_NUMBER:-1}"
 
 mkdir -p "${DIST_DIR}"
+echo "==> Generating app icon"
+bash "${ROOT_DIR}/scripts/generate-app-icon.sh"
 
 echo "==> Building release executable"
 swift build -c release --product "${EXECUTABLE_NAME}"
@@ -36,6 +39,7 @@ mkdir -p "${MACOS_DIR}" "${RUNTIME_DIR}" "${PLUGINS_DIR}"
 cp "${EXECUTABLE_PATH}" "${MACOS_DIR}/${APP_NAME}"
 cp -R "${ROOT_DIR}/runtime/node-host" "${RUNTIME_DIR}/"
 cp -R "${ROOT_DIR}/plugins/." "${PLUGINS_DIR}/"
+cp "${ICON_SOURCE}" "${RESOURCES_DIR}/AppIcon.icns"
 find "${APP_DIR}" -name ".DS_Store" -delete
 
 cat > "${CONTENTS_DIR}/Info.plist" <<PLIST
@@ -57,6 +61,8 @@ cat > "${CONTENTS_DIR}/Info.plist" <<PLIST
   <string>MyCue</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
+  <key>CFBundleIconFile</key>
+  <string>AppIcon</string>
   <key>NSPrincipalClass</key>
   <string>NSApplication</string>
   <key>CFBundleShortVersionString</key>
@@ -79,7 +85,7 @@ PLIST
 
 if [[ -n "${SIGN_IDENTITY}" ]]; then
   echo "==> Codesigning app bundle"
-  codesign --force --deep --sign "${SIGN_IDENTITY}" "${APP_DIR}"
+  codesign --force --deep --options runtime --sign "${SIGN_IDENTITY}" "${APP_DIR}"
 else
   echo "==> Skipping codesign (set MYCUE_CODESIGN_IDENTITY to sign)"
 fi

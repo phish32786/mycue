@@ -93,7 +93,7 @@ scripts/setup-github-signing-secrets.sh \
   /path/to/AuthKey_KEYID12345.p8
 ```
 
-This uploads the secrets directly to `phish32786/mycue` using `gh secret set`.
+This uploads the secrets directly to the configured GitHub repo using `gh secret set`.
 
 ## 5. Run the signed workflow
 
@@ -129,3 +129,45 @@ If it fails, the fastest next step is to inspect the GitHub Actions log for:
 - the `codesign` step
 - the `notarytool submit` step
 - the `stapler` step
+
+## Local notarization smoke test
+
+Before wiring GitHub secrets, validate notarization on this Mac:
+
+1. Build a signed app:
+
+```bash
+export MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)"
+bash scripts/build-alpha.sh
+```
+
+2. Save the notarization key somewhere local, for example:
+
+```bash
+mkdir -p "$HOME/.private_keys"
+cp /path/to/AuthKey_KEYID12345.p8 "$HOME/.private_keys/"
+```
+
+3. Export the notarization environment:
+
+```bash
+export APPLE_TEAM_ID="TEAMID"
+export APPLE_NOTARY_KEY_ID="KEYID12345"
+export APPLE_NOTARY_ISSUER_ID="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+export APPLE_NOTARY_API_KEY_PATH="$HOME/.private_keys/AuthKey_KEYID12345.p8"
+```
+
+4. Run the local notarization helper:
+
+```bash
+bash scripts/notarize-alpha.sh
+```
+
+5. Validate the result:
+
+```bash
+codesign --verify --deep --strict --verbose=2 dist/MyCue.app
+spctl -a -vv dist/MyCue.app
+```
+
+`spctl` should stop reporting `Unnotarized Developer ID` once the app has been notarized and stapled successfully.

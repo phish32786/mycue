@@ -2,6 +2,14 @@
 
 This is the local-development signing path for MyCue when you want macOS privacy permissions, especially Input Monitoring, to stick more reliably across rebuilds.
 
+Preferred signing identity on this Mac:
+
+```bash
+Developer ID Application: Your Name (TEAMID)
+```
+
+Use the self-signed `MyCue Local Dev` identity only as a fallback when the real Developer ID certificate is unavailable.
+
 ## Goal
 
 Create a stable local code-signing identity and use it every time you build `dist/MyCue.app`.
@@ -9,14 +17,14 @@ Create a stable local code-signing identity and use it every time you build `dis
 ## Current build command
 
 ```bash
-MYCUE_CODESIGN_IDENTITY="MyCue Local Dev" bash scripts/build-alpha.sh
+MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" bash scripts/build-alpha.sh
 ```
 
 The packaging script already supports signing. It only needs a valid identity in your login keychain.
 
 ## One-time setup
 
-Run:
+If the real Developer ID identity is not available, run:
 
 ```bash
 bash scripts/setup-local-dev-signing.sh
@@ -42,12 +50,15 @@ Verify with:
 security find-identity -v -p codesigning
 ```
 
-You should see a valid identity for `MyCue Local Dev`.
+You should see a valid identity for one of:
+
+- `Developer ID Application: Your Name (TEAMID)`
+- `MyCue Local Dev`
 
 ## Build a signed local app
 
 ```bash
-MYCUE_CODESIGN_IDENTITY="MyCue Local Dev" bash scripts/build-alpha.sh
+MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" bash scripts/build-alpha.sh
 ```
 
 Output:
@@ -63,7 +74,7 @@ For XENEON hardware testing, use this flow after local signing is set up:
 2. Build a signed local app:
 
 ```bash
-MYCUE_CODESIGN_IDENTITY="MyCue Local Dev" bash scripts/build-alpha.sh
+MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" bash scripts/build-alpha.sh
 ```
 
 3. Launch `dist/MyCue.app`.
@@ -71,6 +82,16 @@ MYCUE_CODESIGN_IDENTITY="MyCue Local Dev" bash scripts/build-alpha.sh
 5. Quit and relaunch `dist/MyCue.app`.
 
 After that, future rebuilds signed with the same identity should be much less likely to lose the permission state.
+
+## Gatekeeper status
+
+A local Developer ID signed build is still expected to show as `Unnotarized Developer ID` until notarization is configured:
+
+```bash
+spctl -a -vv dist/MyCue.app
+```
+
+That is normal for now. Signing stabilizes TCC/Input Monitoring; notarization is a separate release step.
 
 ## HID seize QA check
 

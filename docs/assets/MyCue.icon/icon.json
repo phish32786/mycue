@@ -1,0 +1,41 @@
+{
+  "fill" : {
+    "solid" : "display-p3:0.00000,0.00000,0.00000,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "layer-04-accent.png",
+          "name" : "layer-04-accent"
+        },
+        {
+          "image-name" : "layer-03-monogram.png",
+          "name" : "layer-03-monogram"
+        },
+        {
+          "image-name" : "layer-02-grid.png",
+          "name" : "layer-02-grid"
+        },
+        {
+          "image-name" : "layer-01-shell.png",
+          "name" : "layer-01-shell"
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

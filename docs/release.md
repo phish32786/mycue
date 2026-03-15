@@ -18,6 +18,26 @@ This script:
 - optionally signs the app if `MYCUE_CODESIGN_IDENTITY` is set
 - creates `dist/MyCue-alpha.zip`
 
+## Local notarization path
+
+After building a signed app locally, notarize and staple it with:
+
+```bash
+export APPLE_TEAM_ID="TEAMID"
+export APPLE_NOTARY_KEY_ID="YOUR_KEY_ID"
+export APPLE_NOTARY_ISSUER_ID="YOUR_ISSUER_ID"
+export APPLE_NOTARY_API_KEY_PATH="$HOME/.private_keys/AuthKey_YOUR_KEY_ID.p8"
+bash scripts/notarize-alpha.sh
+```
+
+This script:
+
+- verifies the signed app bundle
+- submits `dist/MyCue-alpha.zip` with `notarytool`
+- staples the returned ticket to `dist/MyCue.app`
+- repacks `dist/MyCue-alpha.zip` from the stapled app
+- reruns local signature checks
+
 ## GitHub Actions
 
 The repo now includes two workflows:
@@ -35,6 +55,8 @@ The repo now includes two workflows:
   - imports a Developer ID certificate
   - builds a signed app bundle
   - submits the zip to Apple notarytool
+  - staples the app
+  - repacks the stapled zip
   - uploads the signed alpha artifacts
 
 ## GitHub secrets for signing
@@ -75,6 +97,18 @@ export MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)"
 ./scripts/build-alpha.sh
 ```
 
+Signed + notarized alpha build:
+
+```bash
+export MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)"
+export APPLE_TEAM_ID="TEAMID"
+export APPLE_NOTARY_KEY_ID="YOUR_KEY_ID"
+export APPLE_NOTARY_ISSUER_ID="YOUR_ISSUER_ID"
+export APPLE_NOTARY_API_KEY_PATH="$HOME/.private_keys/AuthKey_YOUR_KEY_ID.p8"
+./scripts/build-alpha.sh
+bash scripts/notarize-alpha.sh
+```
+
 ## Current limits
 
 - No DMG generation yet
@@ -82,12 +116,10 @@ export MYCUE_CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)"
 - Bundle identifier and version still default to alpha placeholders unless overridden by env vars
 - Login item registration is still a saved preference only
 - GitHub Actions can now produce unsigned or signed alpha artifacts, depending on which workflow you run
-- The signed workflow submits for notarization, but it does not yet staple the app bundle afterward
 
 ## Before external alpha distribution
 
 - replace `com.mycue.alpha` with the real bundle identifier
 - set the real app version/build number in workflow inputs or release env vars
-- add app stapling after notarization
 - verify first-run behavior on a clean macOS machine
 - verify Node runtime launch inside the app bundle on a non-repo path
