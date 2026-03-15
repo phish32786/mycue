@@ -41,6 +41,7 @@ public final class PluginHostController {
     private var stdinPipe: Pipe?
     private var stdoutBuffer = Data()
     private var callbacks: Callbacks?
+    private var lastSnapshots: [PluginSnapshot] = []
 
     public init() {
         decoder.dateDecodingStrategy = .custom { decoder in
@@ -58,7 +59,9 @@ public final class PluginHostController {
     }
 
     public func start(settings: AppSettings, initialHostMetrics: HostSystemMetrics?, callbacks: Callbacks) {
+        stop()
         self.callbacks = callbacks
+        self.lastSnapshots = []
 
         let runtimeURL = resolvedRuntimeURL()
         let pluginsURL = resolvedPluginsURL()
@@ -93,13 +96,21 @@ public final class PluginHostController {
 
         process.terminationHandler = { [weak self] process in
             Task { @MainActor [weak self] in
-                self?.callbacks?.onConnected(false)
-                self?.callbacks?.onLog(
+                guard let self else { return }
+                guard self.process === process else { return }
+                self.process = nil
+                self.stdinPipe = nil
+                self.callbacks?.onConnected(false)
+                self.callbacks?.onLog(
                     PluginLogEvent(
                         level: process.terminationReason == .exit ? "info" : "error",
                         message: "Plugin runtime exited with code \(process.terminationStatus)"
                     )
                 )
+                let degraded = self.degradedSnapshotsForRuntimeExit(exitCode: process.terminationStatus)
+                if !degraded.isEmpty {
+                    self.callbacks?.onSnapshots(degraded)
+                }
             }
         }
 
@@ -149,6 +160,7 @@ public final class PluginHostController {
     }
 
     public func stop() {
+        stdoutBuffer.removeAll(keepingCapacity: false)
         process?.terminate()
         process = nil
         stdinPipe = nil
@@ -194,6 +206,7 @@ public final class PluginHostController {
                 callbacks?.onLog(PluginLogEvent(level: "error", message: "Invalid plugins.snapshot payload"))
                 return
             }
+            lastSnapshots = snapshots
             callbacks?.onSnapshots(snapshots)
         case "plugin.log":
             guard let payload = envelope.payload,
@@ -234,6 +247,38 @@ public final class PluginHostController {
                 lastUpdated: .now
             )
         ]
+    }
+
+    private func degradedSnapshotsForRuntimeExit(exitCode: Int32) -> [PluginSnapshot] {
+        guard !lastSnapshots.isEmpty else {
+            return Self.mockSnapshots()
+        }
+
+        return lastSnapshots.map { snapshot in
+            let detail = "The plugin runtime exited unexpectedly. Use Restart runtime to recover."
+            return PluginSnapshot(
+                manifest: snapshot.manifest,
+                status: .degraded,
+                surface: DashboardSurface(
+                    kind: snapshot.surface.kind,
+                    title: snapshot.manifest.name,
+                    subtitle: "Runtime offline",
+                    detail: detail,
+                    theme: snapshot.surface.theme,
+                    metrics: [],
+                    actions: [],
+                    media: nil,
+                    hourlyForecast: [],
+                    dailyForecast: []
+                ),
+                diagnostics: PluginDiagnostics(
+                    summary: "Runtime exited",
+                    detail: "Exit code \(exitCode)",
+                    lastError: detail
+                ),
+                lastUpdated: .now
+            )
+        }
     }
 
     private func runtimeSettings(from settings: AppSettings) -> HostPluginSettings {
