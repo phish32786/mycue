@@ -75,7 +75,7 @@ struct TouchInteractionOverlay: View {
                             return
                         }
 
-                        if let target = targets.last(where: { $0.frame.insetBy(dx: -18, dy: -18).contains(point) }) {
+                        if let target = preferredTarget(at: point) {
                             lastTriggeredPressSequence = sequence
                             model.perform(
                                 action: SurfaceAction(id: target.actionID, title: target.actionID, icon: ""),
@@ -154,5 +154,27 @@ struct TouchInteractionOverlay: View {
             return (plugin.id, frame)
         }
         .sorted { $0.1.midX < $1.1.midX }
+    }
+
+    private func preferredTarget(at point: CGPoint) -> ActionHitTarget? {
+        let matches = targets.filter { $0.frame.insetBy(dx: -18, dy: -18).contains(point) }
+        guard !matches.isEmpty else { return nil }
+
+        let filtered: [ActionHitTarget]
+        if model.dashboardControlsVisible || model.isLayoutEditMode {
+            let nonReveal = matches.filter { $0.actionID != "revealSettings" }
+            filtered = nonReveal.isEmpty ? matches : nonReveal
+        } else {
+            filtered = matches
+        }
+
+        return filtered.min { lhs, rhs in
+            let lhsArea = lhs.frame.width * lhs.frame.height
+            let rhsArea = rhs.frame.width * rhs.frame.height
+            if abs(lhsArea - rhsArea) > 0.5 {
+                return lhsArea < rhsArea
+            }
+            return lhs.id < rhs.id
+        }
     }
 }
