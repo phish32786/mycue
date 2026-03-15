@@ -58,6 +58,8 @@ The signed alpha workflow expects these repository secrets:
 - `APPLE_NOTARY_API_KEY_P8_BASE64`
   - base64 of the notarization `.p8` API key
 
+Detailed setup instructions are in `docs/signing-setup.md`.
+
 ## Optional signing
 
 Unsigned alpha build:

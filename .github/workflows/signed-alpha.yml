@@ -79,6 +79,16 @@ jobs:
             --team-id "$APPLE_TEAM_ID" \
             --wait
 
+      - name: Staple notarization ticket
+        run: |
+          xcrun stapler staple dist/MyCue.app
+          codesign --verify --deep --strict --verbose=2 dist/MyCue.app
+
+      - name: Repack stapled alpha zip
+        run: |
+          rm -f dist/MyCue-alpha.zip
+          ditto -c -k --sequesterRsrc --keepParent dist/MyCue.app dist/MyCue-alpha.zip
+
       - name: Upload signed alpha artifact
         uses: actions/upload-artifact@v4
         with:
@@ -87,4 +97,3 @@ jobs:
             dist/MyCue.app
             dist/MyCue-alpha.zip
           if-no-files-found: error
-
