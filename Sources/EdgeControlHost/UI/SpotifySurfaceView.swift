@@ -68,7 +68,7 @@ struct SpotifySurfaceView: View {
     }
 
     private func footer(media: MediaSurface) -> some View {
-        VStack(spacing: 7) {
+        VStack(spacing: 9) {
             ProgressView(value: media.progress)
                 .progressViewStyle(.linear)
                 .tint(.white)
@@ -77,18 +77,18 @@ struct SpotifySurfaceView: View {
                 Spacer()
                 Text(media.durationText)
             }
-            .font(.system(size: 11, weight: .medium, design: .monospaced))
+            .font(.system(size: 12, weight: .medium, design: .monospaced))
             .foregroundStyle(.white.opacity(0.60))
 
-            HStack(spacing: 10) {
+            HStack(spacing: 12) {
                 ForEach(surface.actions) { action in
                     Button {
                         model.perform(action: action, pluginID: pluginID)
                     } label: {
                         Label(action.title, systemImage: action.icon)
                             .labelStyle(.iconOnly)
-                            .font(.system(size: 16, weight: .bold))
-                            .frame(width: 40, height: 38)
+                            .font(.system(size: 20, weight: .bold))
+                            .frame(width: 52, height: 50)
                     }
                     .buttonStyle(.plain)
                     .background(.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 2, style: .continuous))
@@ -103,10 +103,10 @@ struct SpotifySurfaceView: View {
 
                 VStack(alignment: .trailing, spacing: 3) {
                     Text(media.deviceName ?? "Mac")
-                        .font(.system(size: 11, weight: .bold, design: .monospaced))
+                        .font(.system(size: 12, weight: .bold, design: .monospaced))
                         .textCase(.uppercase)
                     Text("Volume \(Int(media.volume * 100))%")
-                        .font(.system(size: 10, weight: .medium, design: .monospaced))
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .foregroundStyle(.white.opacity(0.60))
                         .textCase(.uppercase)
                 }

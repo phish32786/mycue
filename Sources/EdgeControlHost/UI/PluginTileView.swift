@@ -18,16 +18,17 @@ struct PluginTileView: View {
                 }
 
                 if !model.isLayoutEditMode && !plugin.surface.actions.isEmpty && plugin.surface.kind != .spotify && plugin.status != .failed {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 10) {
                         ForEach(plugin.surface.actions) { action in
                             Button {
                                 model.perform(action: action, pluginID: plugin.id)
                             } label: {
                                 Text(action.title.uppercased())
-                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                    .font(.system(size: 13, weight: .bold, design: .monospaced))
                                     .foregroundStyle(.white.opacity(0.90))
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 10)
+                                    .frame(maxWidth: .infinity, minHeight: 48)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 12)
                                     .background(.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 2, style: .continuous))
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 2, style: .continuous)
@@ -128,11 +129,11 @@ struct PluginTileView: View {
     private var degradedBanner: some View {
         HStack(alignment: .center, spacing: 10) {
             Text("DEGRADED")
-                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                .font(.system(size: 12, weight: .bold, design: .monospaced))
                 .foregroundStyle(.white.opacity(0.92))
 
             Text(plugin.diagnostics.summary.uppercased())
-                .font(.system(size: 10, weight: .medium, design: .monospaced))
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
                 .foregroundStyle(.white.opacity(0.60))
                 .lineLimit(1)
 
@@ -142,10 +143,10 @@ struct PluginTileView: View {
                 model.restartPluginRuntime()
             }
             .buttonStyle(.plain)
-            .font(.system(size: 10, weight: .bold, design: .monospaced))
+            .font(.system(size: 12, weight: .bold, design: .monospaced))
             .foregroundStyle(.white.opacity(0.90))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
             .background(.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 2, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 2, style: .continuous)
@@ -168,17 +169,17 @@ struct PluginTileView: View {
                     .font(.system(size: 18, weight: .bold, design: .monospaced))
                     .foregroundStyle(.white)
                 Text("PLUGIN FAILURE")
-                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                    .font(.system(size: 12, weight: .bold, design: .monospaced))
                     .foregroundStyle(.orange.opacity(0.88))
                 Text(plugin.diagnostics.summary.uppercased())
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundStyle(.white.opacity(0.70))
                     .lineLimit(2)
             }
 
             if let detail = plugin.diagnostics.lastError ?? plugin.surface.detail ?? plugin.diagnostics.detail {
                 Text(detail)
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundStyle(.white.opacity(0.62))
                     .lineLimit(5)
             }
@@ -201,10 +202,11 @@ struct PluginTileView: View {
     private func failureButton(title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .font(.system(size: 13, weight: .bold, design: .monospaced))
                 .foregroundStyle(.white.opacity(0.92))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
+                .frame(maxWidth: .infinity, minHeight: 48)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 12)
                 .background(.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 2, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 2, style: .continuous)
@@ -248,10 +250,10 @@ struct PluginTileView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
                 Text("Edit")
-                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                    .font(.system(size: 12, weight: .bold, design: .monospaced))
                     .foregroundStyle(.white.opacity(0.78))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 8)
                     .background(.black.opacity(0.32), in: RoundedRectangle(cornerRadius: 2, style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: 2, style: .continuous)
@@ -288,10 +290,10 @@ struct PluginTileView: View {
             model.perform(action: SurfaceAction(id: actionID, title: title, icon: systemImage), pluginID: plugin.id)
         } label: {
             Label(title, systemImage: systemImage)
-                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .font(.system(size: 13, weight: .bold, design: .monospaced))
                 .foregroundStyle(.white.opacity(0.94))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
                 .background(.black.opacity(0.30), in: RoundedRectangle(cornerRadius: 2, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 2, style: .continuous)

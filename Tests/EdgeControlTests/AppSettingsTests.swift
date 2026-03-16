@@ -86,3 +86,57 @@ func dashboardPagesDecodeLegacyPluginIDFormat() throws {
     #expect(decoded.mediaGallery.title == "Gallery")
     #expect(decoded.mediaGallery.folderPath.isEmpty)
 }
+
+@Test
+func appSettingsDecodeDefaultsForMissingFields() throws {
+    let json = """
+    {
+      "selectedDisplayID": "display-2"
+    }
+    """.data(using: .utf8)!
+
+    let decoded = try JSONDecoder().decode(AppSettings.self, from: json)
+
+    #expect(decoded.selectedDisplayID == "display-2")
+    #expect(decoded.launchAtLogin == false)
+    #expect(decoded.kioskMode == true)
+    #expect(decoded.startInDashboard == true)
+    #expect(decoded.darkChrome == true)
+    #expect(decoded.debugMode == false)
+    #expect(decoded.devKitEnabled == true)
+    #expect(decoded.weather.locationName == "Detroit")
+    #expect(decoded.f1.title == "Race Control")
+    #expect(decoded.dashboardPages.isEmpty)
+}
+
+@Test
+func appSettingsRoundTripPersistsPluginConfiguration() throws {
+    let settings = AppSettings(
+        enabledPluginIDs: ["f1", "weather"],
+        disabledPluginIDs: ["spotify"],
+        weather: WeatherPluginSettings(
+            locationName: "Montreal",
+            latitude: 45.5017,
+            longitude: -73.5673,
+            unitPreference: .metric
+        ),
+        f1: F1PluginSettings(
+            title: "Race Control",
+            subtitle: "Completed race data",
+            seasonYear: 2026,
+            sessionName: "Race",
+            eventFilter: "Monaco",
+            sessionKeyOverride: 11245
+        )
+    )
+
+    let encoded = try JSONEncoder().encode(settings)
+    let decoded = try JSONDecoder().decode(AppSettings.self, from: encoded)
+
+    #expect(decoded.enabledPluginIDs.contains("f1"))
+    #expect(decoded.disabledPluginIDs.contains("spotify"))
+    #expect(decoded.weather.locationName == "Montreal")
+    #expect(decoded.weather.unitPreference == .metric)
+    #expect(decoded.f1.eventFilter == "Monaco")
+    #expect(decoded.f1.sessionKeyOverride == 11245)
+}

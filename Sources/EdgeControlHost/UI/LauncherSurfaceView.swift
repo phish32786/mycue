@@ -12,32 +12,32 @@ struct LauncherSurfaceView: View {
     ]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             if let detail = surface.detail {
                 Text(detail)
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(0.60))
             }
 
-            LazyVGrid(columns: columns, spacing: 10) {
+            LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(surface.actions) { action in
                     Button {
                         model.perform(action: action, pluginID: pluginID)
                     } label: {
-                        VStack(alignment: .leading, spacing: 6) {
+                        VStack(alignment: .leading, spacing: 8) {
                             Image(systemName: action.icon)
-                                .font(.system(size: 22, weight: .semibold))
+                                .font(.system(size: 26, weight: .semibold))
                             Text(action.title)
-                                .font(.system(size: 14, weight: .bold, design: .monospaced))
+                                .font(.system(size: 16, weight: .bold, design: .monospaced))
                                 .multilineTextAlignment(.leading)
                             if let role = action.role {
                                 Text(role)
-                                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
                                     .foregroundStyle(.white.opacity(0.58))
                             }
                         }
-                        .frame(maxWidth: .infinity, minHeight: 112, alignment: .topLeading)
-                        .padding(12)
+                        .frame(maxWidth: .infinity, minHeight: 132, alignment: .topLeading)
+                        .padding(14)
                         .background(.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 3, style: .continuous))
                         .overlay(
                             RoundedRectangle(cornerRadius: 3, style: .continuous)

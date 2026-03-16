@@ -38,34 +38,39 @@ struct DashboardHeaderView: View {
     }
 
     private var hardwareOverlay: some View {
-        HStack {
+        VStack {
             Spacer()
 
-            ZStack(alignment: .topTrailing) {
-                if model.dashboardControlsVisible || model.isLayoutEditMode {
-                    HStack(spacing: 10) {
-                        editModeButton
-                        settingsButton
+            HStack {
+                Spacer()
+
+                ZStack(alignment: .bottomTrailing) {
+                    if model.dashboardControlsVisible || model.isLayoutEditMode {
+                        HStack(spacing: 10) {
+                            editModeButton
+                            settingsButton
+                        }
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    } else {
+                        revealHotspot
                     }
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                } else {
-                    revealHotspot
                 }
             }
         }
-        .padding(.horizontal, 18)
+        .padding(.trailing, 18)
+        .padding(.bottom, 18)
     }
 
     private var settingsButton: some View {
-        Button {
-            model.openSettingsWindow()
-            model.hideDashboardControls()
-        } label: {
-            Label("Settings", systemImage: "gearshape.fill")
-                .font(.system(size: 12, weight: .bold, design: .monospaced))
+                    Button {
+                        model.openSettingsWindow()
+                        model.hideDashboardControls()
+                    } label: {
+                        Label("Settings", systemImage: "gearshape.fill")
+                .font(.system(size: 13, weight: .bold, design: .monospaced))
                 .foregroundStyle(.white.opacity(0.92))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
                 .background(.black.opacity(0.28), in: RoundedRectangle(cornerRadius: 3, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 3, style: .continuous)
@@ -81,10 +86,10 @@ struct DashboardHeaderView: View {
             model.setLayoutEditMode(!model.isLayoutEditMode)
         } label: {
             Label(model.isLayoutEditMode ? "Done" : "Edit", systemImage: model.isLayoutEditMode ? "checkmark.circle.fill" : "slider.horizontal.3")
-                .font(.system(size: 12, weight: .bold, design: .monospaced))
+                .font(.system(size: 13, weight: .bold, design: .monospaced))
                 .foregroundStyle(.white.opacity(0.92))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
                 .background((model.isLayoutEditMode ? Color.mint : .black).opacity(model.isLayoutEditMode ? 0.24 : 0.28), in: RoundedRectangle(cornerRadius: 3, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 3, style: .continuous)
@@ -101,17 +106,17 @@ struct DashboardHeaderView: View {
                 model.revealDashboardControlsTemporarily()
             }
         } label: {
-            HStack(spacing: 8) {
+            HStack(spacing: 10) {
                 Image(systemName: "gearshape.fill")
-                    .font(.system(size: 11, weight: .bold))
+                    .font(.system(size: 13, weight: .bold))
 
                 Text("CTL")
-                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .font(.system(size: 12, weight: .bold, design: .monospaced))
                     .tracking(0.8)
             }
             .foregroundStyle(.white.opacity(0.55))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
             .background(.black.opacity(0.20), in: RoundedRectangle(cornerRadius: 2, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 2, style: .continuous)

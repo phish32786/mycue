@@ -67,7 +67,6 @@ struct TouchInteractionOverlay: View {
                     }
                     .onChange(of: model.touchState.pressSequence) { _, sequence in
                         guard !model.isDevKitMode else { return }
-                        guard !model.isLayoutEditMode else { return }
                         guard model.touchState.isPressed,
                               model.touchState.isCalibrated,
                               sequence != lastTriggeredPressSequence,
@@ -163,7 +162,9 @@ struct TouchInteractionOverlay: View {
         let filtered: [ActionHitTarget]
         if model.dashboardControlsVisible || model.isLayoutEditMode {
             let nonReveal = matches.filter { $0.actionID != "revealSettings" }
-            filtered = nonReveal.isEmpty ? matches : nonReveal
+            let visibleMatches = nonReveal.isEmpty ? matches : nonReveal
+            let hostMatches = visibleMatches.filter { $0.pluginID == "__host__" }
+            filtered = hostMatches.isEmpty ? visibleMatches : hostMatches
         } else {
             filtered = matches
         }

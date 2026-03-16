@@ -5,7 +5,7 @@ import { validatePlugin } from "../src/manifest-lib.mjs";
 
 test("starter plugins validate", async () => {
   const root = resolve(process.cwd(), "plugins");
-  for (const pluginID of ["launcher", "media-gallery", "system-stats", "spotify", "weather", "web-widget"]) {
+  for (const pluginID of ["f1", "launcher", "media-gallery", "system-stats", "spotify", "weather", "web-widget"]) {
     const result = await validatePlugin(resolve(root, pluginID));
     assert.equal(result.valid, true);
   }

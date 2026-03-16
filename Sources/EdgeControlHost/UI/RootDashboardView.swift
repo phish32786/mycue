@@ -317,8 +317,8 @@ private struct DashboardPageStripView: View {
                             .font(.system(size: 11, weight: .bold, design: .monospaced))
                             .foregroundStyle(.white.opacity(model.currentPageID == page.id ? 0.92 : 0.62))
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 9)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 11)
                     .background(
                         RoundedRectangle(cornerRadius: 2, style: .continuous)
                             .fill(model.currentPageID == page.id ? .black.opacity(0.28) : .black.opacity(0.14))
@@ -351,10 +351,10 @@ private struct DashboardPageStripView: View {
             model.perform(action: SurfaceAction(id: actionID, title: title, icon: systemImage), pluginID: "__host__")
         } label: {
             Label(title, systemImage: systemImage)
-                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .font(.system(size: 13, weight: .bold, design: .monospaced))
                 .foregroundStyle(.white.opacity(0.92))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 9)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 11)
                 .background(.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 2, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 2, style: .continuous)
